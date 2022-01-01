@@ -41,15 +41,12 @@ export const makeChildren = (value: Array<TreeFile> = []) => {
       return `${a.name}`.charCodeAt(0) - `${b.name}`.charCodeAt(0)
     })
       .map((item, index) => {
-        console.log("Created " + item.name)
         if (item.type === directoryType)
           return (
             <TreeFolder
               dataValue={item.files}
               setClick={(click: any) => {
-                //console.log("pushing click")
                 childClicks.push(click)
-                //console.log(childClicks)
               }}
               name={item.name}
               extra={item.extra}

@@ -51,38 +51,20 @@ const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> =({
     if (parentLevel <= 0) {
       process()
     }
-    setClick(process)
+    if (setClick != undefined) {
+      setClick(process)
+    }
   }, [])
 
 
   const currentPath = useMemo(() => makeChildPath(name, parentPath), [])
-
-  const [nextChildren, setNextChildren] = useState(undefined)
 
   const [clicks, setClicks] = useState<any[]>()
 
   const [sortedChildren, setSortedChildren] = useState(null)
 
   const clickHandler = () => {
-    //if (onFileClick) {
-    //  onFileClick(currentPath)
-    //}
-    //console.log("AAAAAAAAAAAA")
-    //console.log(currentPath)
-    //console.log(nextChildren)
-    //console.log(sortedChildren)
-    //console.log(processed)
-    //console.log(dataValue)
     clicks?.map(async (click) => {click()})
-    //clicks?.map((click) => click())
-    //console.log("chacha")
-    //process()
-    //console.log(currentPath)
-    //console.log(nextChildren)
-    //console.log(sortedChildren)
-    //console.log(processed)
-   // console.log(dataValue)
-    //console.log("BBBBBBBBBBBB")
     setExpanded(!expanded)
   }
 
@@ -90,16 +72,12 @@ const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> =({
   const process = () => {
     if (processed)
       return
-    //console.log('Processing ' + currentPath + ' level ' + parentLevel + " processed " + processed)
     setProcessed(true)
     let children = makeChildren(dataValue)
     setClicks(children?.clicks)
-    //console.log("QQQQQQQQQQQQQQQQQQQQQ")
-    //console.log(clicks)
     clicks?.map((click) => (click()))
-    //console.log(currentPath)
-    //console.log(children)
-    let t = setChildrenProps(
+    // @ts-ignore
+    let nextChildren = setChildrenProps(
       children?.values,
       {
         parentPath: currentPath,
@@ -107,22 +85,10 @@ const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> =({
       },
       [TreeFolder, TreeFile],
     )
-    //console.log(t)
     // @ts-ignore
-    setNextChildren(t)
-    // @ts-ignore
-    // eslint-disable-next-line react/no-this-in-sfc
-    props.nextChildren = t
-    console.log(nextChildren)
-    //console.log("MASLO " + isImperative)
-    let r = isImperative
-      ? t
-      : sortChildren(t, TreeFolder)
-    //console.log(r)
-    // @ts-ignore
-    setSortedChildren(r)
-    //console.log(sortedChildren)
-    console.log("WWWWWWWWWWWWWWWWWWWWWWWWW")
+    setSortedChildren(isImperative
+      ? nextChildren
+      : sortChildren(nextChildren, TreeFolder))
     setForceReshapeIndicator(!forceReshapeIndicator)
   }
 
