@@ -31,32 +31,41 @@ const defaultProps = {
 type NativeAttrs = Omit<React.HTMLAttributes<any>, keyof Props>
 export type TreeProps = Props & NativeAttrs
 
-const makeChildren = (value: Array<TreeFile> = []) => {
+export const makeChildren = (value: Array<TreeFile> = []) => {
   if (!value || !value.length) return null
-  return value
-    .sort((a, b) => {
+  let childClicks: any[] = []
+  return {
+    values: value.sort((a, b) => {
       if (a.type !== b.type) return a.type !== directoryType ? 1 : -1
 
       return `${a.name}`.charCodeAt(0) - `${b.name}`.charCodeAt(0)
     })
-    .map((item, index) => {
-      if (item.type === directoryType)
+      .map((item, index) => {
+        console.log("Created " + item.name)
+        if (item.type === directoryType)
+          return (
+            <TreeFolder
+              dataValue={item.files}
+              setClick={(click: any) => {
+                //console.log("pushing click")
+                childClicks.push(click)
+                //console.log(childClicks)
+              }}
+              name={item.name}
+              extra={item.extra}
+              key={`folder-${item.name}-${index}`}>
+            </TreeFolder>
+          )
         return (
-          <TreeFolder
+          <TreeFile
             name={item.name}
             extra={item.extra}
-            key={`folder-${item.name}-${index}`}>
-            {makeChildren(item.files)}
-          </TreeFolder>
+            key={`file-${item.name}-${index}`}
+          />
         )
-      return (
-        <TreeFile
-          name={item.name}
-          extra={item.extra}
-          key={`file-${item.name}-${index}`}
-        />
-      )
-    })
+      }),
+    clicks: childClicks
+  }
 }
 
 const Tree: React.FC<React.PropsWithChildren<TreeProps>> = ({
@@ -82,7 +91,7 @@ const Tree: React.FC<React.PropsWithChildren<TreeProps>> = ({
   )
 
   const customChildren = isImperative
-    ? makeChildren(value)
+    ? makeChildren(value)?.values
     : sortChildren(children, TreeFolder)
 
   return (

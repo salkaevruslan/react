@@ -3,6 +3,7 @@ import useRealShape from '../utils/use-real-shape'
 
 export type ExpandProps = {
   isExpanded?: boolean
+  forceReshapeIndicator?: boolean
   delay?: number
 }
 
@@ -13,6 +14,7 @@ const defaultProps = {
 
 const Expand: React.FC<React.PropsWithChildren<ExpandProps>> = ({
   isExpanded,
+  forceReshapeIndicator = false,
   delay,
   children,
 }: React.PropsWithChildren<ExpandProps> & typeof defaultProps) => {
@@ -61,7 +63,7 @@ const Expand: React.FC<React.PropsWithChildren<ExpandProps>> = ({
       clearTimeout(leaveTimer.current)
       clearTimeout(resetTimer.current)
     }
-  }, [isExpanded])
+  }, [isExpanded, forceReshapeIndicator])
 
   return (
     <div className={`container ${selfExpanded ? 'expanded' : ''}`}>

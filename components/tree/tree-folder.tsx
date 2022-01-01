@@ -4,12 +4,15 @@ import { setChildrenProps } from '../utils/collections'
 import TreeFile from './tree-file'
 import Expand from '../shared/expand'
 import TreeIndents from './tree-indents'
+import { TreeFile as TreeFileData, makeChildren } from './tree'
 import { useTreeContext } from './tree-context'
 import TreeFolderIcon from './tree-folder-icon'
 import TreeStatusIcon from './tree-status-icon'
 import { sortChildren, makeChildPath, stopPropagation } from './tree-help'
 
 interface Props {
+  dataValue: Array<TreeFileData> | undefined,
+  setClick: (click: any) => any,
   name: string
   extra?: string
   parentPath?: string
@@ -26,9 +29,10 @@ const defaultProps = {
 type NativeAttrs = Omit<React.HTMLAttributes<any>, keyof Props>
 export type TreeFolderProps = Props & NativeAttrs
 
-const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> = ({
+const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> =({
+  dataValue,
+  setClick,
   name,
-  children,
   parentPath,
   level: parentLevel,
   extra,
@@ -38,41 +42,107 @@ const TreeFolder: React.FC<React.PropsWithChildren<TreeFolderProps>> = ({
   const theme = useTheme()
   const { initialExpand, isImperative } = useTreeContext()
   const [expanded, setExpanded] = useState<boolean>(initialExpand)
-  useEffect(() => setExpanded(initialExpand), [])
+  const [forceReshapeIndicator, setForceReshapeIndicator] = useState<boolean>(false)
+  const [processed, setProcessed] = useState<boolean>(false)
+  useEffect(() => {
+    setExpanded(initialExpand)
+    //console.log(currentPath)
+    //console.log(parentLevel)
+    if (parentLevel <= 0) {
+      process()
+    }
+    setClick(process)
+  }, [])
+
 
   const currentPath = useMemo(() => makeChildPath(name, parentPath), [])
-  const clickHandler = () => setExpanded(!expanded)
 
-  const nextChildren = setChildrenProps(
-    children,
-    {
-      parentPath: currentPath,
-      level: parentLevel + 1,
-    },
-    [TreeFolder, TreeFile],
-  )
+  const [nextChildren, setNextChildren] = useState(undefined)
 
-  const sortedChildren = isImperative
-    ? nextChildren
-    : sortChildren(nextChildren, TreeFolder)
+  const [clicks, setClicks] = useState<any[]>()
+
+  const [sortedChildren, setSortedChildren] = useState(null)
+
+  const clickHandler = () => {
+    //if (onFileClick) {
+    //  onFileClick(currentPath)
+    //}
+    //console.log("AAAAAAAAAAAA")
+    //console.log(currentPath)
+    //console.log(nextChildren)
+    //console.log(sortedChildren)
+    //console.log(processed)
+    //console.log(dataValue)
+    clicks?.map(async (click) => {click()})
+    //clicks?.map((click) => click())
+    //console.log("chacha")
+    //process()
+    //console.log(currentPath)
+    //console.log(nextChildren)
+    //console.log(sortedChildren)
+    //console.log(processed)
+   // console.log(dataValue)
+    //console.log("BBBBBBBBBBBB")
+    setExpanded(!expanded)
+  }
+
+
+  const process = () => {
+    if (processed)
+      return
+    //console.log('Processing ' + currentPath + ' level ' + parentLevel + " processed " + processed)
+    setProcessed(true)
+    let children = makeChildren(dataValue)
+    setClicks(children?.clicks)
+    //console.log("QQQQQQQQQQQQQQQQQQQQQ")
+    //console.log(clicks)
+    clicks?.map((click) => (click()))
+    //console.log(currentPath)
+    //console.log(children)
+    let t = setChildrenProps(
+      children?.values,
+      {
+        parentPath: currentPath,
+        level: parentLevel + 1,
+      },
+      [TreeFolder, TreeFile],
+    )
+    //console.log(t)
+    // @ts-ignore
+    setNextChildren(t)
+    // @ts-ignore
+    // eslint-disable-next-line react/no-this-in-sfc
+    props.nextChildren = t
+    console.log(nextChildren)
+    //console.log("MASLO " + isImperative)
+    let r = isImperative
+      ? t
+      : sortChildren(t, TreeFolder)
+    //console.log(r)
+    // @ts-ignore
+    setSortedChildren(r)
+    //console.log(sortedChildren)
+    console.log("WWWWWWWWWWWWWWWWWWWWWWWWW")
+    setForceReshapeIndicator(!forceReshapeIndicator)
+  }
 
   return (
     <div className={`folder ${className}`} onClick={clickHandler} {...props}>
-      <div className="names">
+      <div className='names'>
         <TreeIndents count={parentLevel} />
-        <span className="status">
+        <span className='status'>
           <TreeStatusIcon active={expanded} />
         </span>
-        <span className="icon">
+        <span className='icon'>
           <TreeFolderIcon />
         </span>
-        <span className="name">
+        <span className='name'>
           {name}
-          {extra && <span className="extra">{extra}</span>}
+          {extra && <span className='extra'>{extra}</span>}
         </span>
       </div>
-      <Expand isExpanded={expanded}>
-        <div className="content" onClick={stopPropagation}>
+      <Expand isExpanded={expanded} forceReshapeIndicator={forceReshapeIndicator}>
+        <div className='content' onClick={stopPropagation}>
           {sortedChildren}
         </div>
       </Expand>
