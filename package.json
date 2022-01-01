@@ -1,6 +1,6 @@
 {
-  "name": "@geist-ui/react",
-  "version": "2.2.0",
+  "name": "@salkaevruslan/react",
+  "version": "2.2.1",
   "main": "dist/index.js",
   "module": "esm/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/geist-org/react"
+    "url": "https://github.com/salkaevruslan/react.git"
   },
   "prettier": "@geist-ui/prettier-config",
   "keywords": [
